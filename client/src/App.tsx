@@ -41,9 +41,44 @@ const AddTodoLink = () => {
   )
 }
 
-const TodoList = () => {
+interface TodoProps {
+  todo: Todo;
+}
+
+const Todo = ( {todo}: TodoProps) => {
+  const dueDate = `${todo.month}/${todo.year.slice(2)}`;
+
+  return (
+    <tr  data-id="{{id}}" >
+      <td className="list_item">
+        {todo.completed 
+         ? <input type="checkbox" name="item_{{id}}" id="item_{{id}}" checked/>
+         : <input type="checkbox" name="item_{{id}}" id="item_{{id}}"/>}
+        <span className="check"></span>
+        <label htmlFor="item_{{id}}">
+          {todo.title} - {dueDate.trim() ? dueDate : "No Due Date"}
+        </label>
+      </td>
+
+      <td className="delete"><img src="images/trash.png" alt="Delete"/></td>
+    </tr>
+  )
+}
+
+interface TodoListProps {
+  todos: Todo[];
+}
+
+const TodoList = ({ todos }: TodoListProps) => {
   return (
     <>
+      <table cellSpacing="0">
+        <tbody>
+          {todos.map((todo: Todo) => {
+            return <Todo key={todo.id} todo={todo}/>
+          })}
+        </tbody>
+      </table>
     </>
   )
 }
@@ -55,12 +90,15 @@ const FormModal = () => {
   )
 }
 
+interface MainProps {
+  todos: Todo[];
+}
 
-const Main = () => {
+const Main = ({ todos }: MainProps) => {
   return (
     <main>
       <AddTodoLink />
-      <TodoList />
+      <TodoList todos={todos}/>
       <FormModal />
     </main>
   )
@@ -94,7 +132,7 @@ const App = () => {
 
       <div id="items">
         <Header todosAmount={todos.length}/>
-        <Main />
+        <Main todos={todos}/>
       </div>
     </>
   )
