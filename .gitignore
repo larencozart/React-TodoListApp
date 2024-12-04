@@ -1,0 +1,5 @@
+.DS_Store
+html_css
+*/node_modules
+server/db/development.sqlite3
+server/db/*.sql
