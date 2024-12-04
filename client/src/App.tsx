@@ -18,7 +18,15 @@ interface HeaderProps {
 
 const Header = ({ todosAmount }: HeaderProps) => {
   return (
-    <h1>All Todos {todosAmount}</h1>
+    <header>
+      {/* <label>
+        <img src="images/hamburger.png" alt="Toggle Sidebar" />
+      </label> */}
+      <dl>
+        <dt><time>All Todos</time></dt>
+        <dd>{todosAmount}</dd>
+      </dl>
+    </header>
   )
 }
 
@@ -42,7 +50,6 @@ const App = () => {
   
   return (
     <>
-      <Header todosAmount={todos.length}/>
       {todos.map((todo: Todo) => {
         return <p key={todo.id}>
           {`[ ] ${todo.title} - Due Date Here`}
@@ -50,7 +57,7 @@ const App = () => {
       })}
 
       <div id="items">
-        
+        <Header todosAmount={todos.length}/>
       </div>
     </>
   )
