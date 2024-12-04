@@ -39,11 +39,8 @@ const AddTodoLink = ({ openFormModal }: AddTodoLinkProps) => {
     <>
       <label 
         htmlFor="new_item"
-        onMouseDown={(e) => {
-          // open form modal
+        onClick={(e) => {
           e.preventDefault();
-          console.log(e.target);
-          console.log("Want to add new todo");
           openFormModal();
         }}
       >
@@ -68,7 +65,9 @@ const Todo = ( {todo, openFormModal}: TodoProps) => {
   }
 
   return (
-    <tr  data-id="{{id}}" >
+    <tr 
+    data-id="{{id}}"
+    onClick={() => openFormModal()}>
       <td className="list_item">
         {todo.completed 
          ? <input type="checkbox" name="item_{{id}}" id="item_{{id}}" defaultChecked/>
@@ -116,7 +115,10 @@ const FormModal = ({ isOpen, closeFormModal }: FormModalProps) => {
 
   return (
     <>
-      <div className="modal" id="modal_layer"></div>
+      <div 
+        className="modal" 
+        id="modal_layer"
+        onClick={() => closeFormModal()}></div>
       <div className="modal" id="form_modal">
         <form action="" method="post">
           <fieldset>
@@ -217,20 +219,8 @@ interface MainProps {
 const Main = ({ todos }: MainProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  useEffect(() => {
-    console.log("current state of isOpen:", isOpen);
-  }, [isOpen]);
-
-
-  const openFormModal = () => {
-    console.log("Setting isOpen state to true");
-    setIsOpen(true)
-  };
-
-  const closeFormModal = () => {
-    console.log("Setting isOpen state to false");
-    setIsOpen(false)
-  };
+  const openFormModal = () => setIsOpen(true);
+  const closeFormModal = () => setIsOpen(false);
 
   return (
     <main>
