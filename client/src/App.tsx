@@ -19,7 +19,7 @@ interface HeaderProps {
 const Header = ({ todosAmount }: HeaderProps) => {
   return (
     <header>
-      {/* <label>
+      {/* <label htmlFor="sidebar_toggle">
         <img src="images/hamburger.png" alt="Toggle Sidebar" />
       </label> */}
       <dl>
@@ -27,6 +27,42 @@ const Header = ({ todosAmount }: HeaderProps) => {
         <dd>{todosAmount}</dd>
       </dl>
     </header>
+  )
+}
+
+const AddTodoLink = () => {
+  return (
+    <>
+      <label htmlFor="new_item">
+        <img src="images/plus.png" alt="Add Todo Item" />
+        <h2>Add new to do</h2>
+      </label>
+    </>
+  )
+}
+
+const TodoList = () => {
+  return (
+    <>
+    </>
+  )
+}
+
+const FormModal = () => {
+  return (
+    <>
+    </>
+  )
+}
+
+
+const Main = () => {
+  return (
+    <main>
+      <AddTodoLink />
+      <TodoList />
+      <FormModal />
+    </main>
   )
 }
 
@@ -58,6 +94,7 @@ const App = () => {
 
       <div id="items">
         <Header todosAmount={todos.length}/>
+        <Main />
       </div>
     </>
   )
