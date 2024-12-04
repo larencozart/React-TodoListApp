@@ -321,17 +321,18 @@ input[type="checkbox"] + section {
   display: none;
 }
 #form_modal{
-  display: none;
+  display: block;
   position: absolute;
   top: 0;
   left: 50%;
+  margin-top: 150px;
   margin-left: -287.5px;
   width: 575px;
   background-color: #ffffff;
   z-index: 2;
 }
 #modal_layer{
-  display: none;
+  display: block;
   position: fixed;
   top: 0;
   bottom: 0;

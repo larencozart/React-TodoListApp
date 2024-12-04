@@ -56,9 +56,10 @@ const AddTodoLink = ({ openFormModal }: AddTodoLinkProps) => {
 
 interface TodoProps {
   todo: Todo;
+  openFormModal: () => void;
 }
 
-const Todo = ( {todo}: TodoProps) => {
+const Todo = ( {todo, openFormModal}: TodoProps) => {
   let dueDate;
   if (todo.month && todo.year) {
     dueDate = `${todo.month}/${todo.year.slice(2)}`;
@@ -85,14 +86,20 @@ const Todo = ( {todo}: TodoProps) => {
 
 interface TodoListProps {
   todos: Todo[];
+  openFormModal: () => void;
 }
 
-const TodoList = ({ todos }: TodoListProps) => {
+const TodoList = ({ todos, openFormModal }: TodoListProps) => {
   return (
     <table cellSpacing="0">
       <tbody>
         {todos.map((todo: Todo) => {
-          return <Todo key={todo.id} todo={todo}/>
+          return (
+            <Todo 
+              key={todo.id} 
+              todo={todo}
+              openFormModal={openFormModal}/>
+          );
         })}
       </tbody>
     </table>
@@ -101,9 +108,10 @@ const TodoList = ({ todos }: TodoListProps) => {
 
 interface FormModalProps {
   isOpen: boolean;
+  closeFormModal: () => void;
 }
 
-const FormModal = ({ isOpen }: FormModalProps) => {
+const FormModal = ({ isOpen, closeFormModal }: FormModalProps) => {
   if (!isOpen) return null;
 
   return (
@@ -209,8 +217,20 @@ interface MainProps {
 const Main = ({ todos }: MainProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const openFormModal = () => setIsOpen(true);
-  const closeFormModal = () => setIsOpen(false);
+  useEffect(() => {
+    console.log("current state of isOpen:", isOpen);
+  }, [isOpen]);
+
+
+  const openFormModal = () => {
+    console.log("Setting isOpen state to true");
+    setIsOpen(true)
+  };
+
+  const closeFormModal = () => {
+    console.log("Setting isOpen state to false");
+    setIsOpen(false)
+  };
 
   return (
     <main>
@@ -218,7 +238,9 @@ const Main = ({ todos }: MainProps) => {
       <TodoList 
         todos={todos}
         openFormModal={openFormModal}/>
-      <FormModal isOpen={isOpen}/>
+      <FormModal 
+        isOpen={isOpen}
+        closeFormModal={closeFormModal}/>
     </main>
   )
 }
