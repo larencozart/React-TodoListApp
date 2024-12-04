@@ -46,7 +46,12 @@ interface TodoProps {
 }
 
 const Todo = ( {todo}: TodoProps) => {
-  const dueDate = `${todo.month}/${todo.year.slice(2)}`;
+  let dueDate;
+  if (todo.month && todo.year) {
+    dueDate = `${todo.month}/${todo.year.slice(2)}`;
+  } else {
+    dueDate = "No Due Date";
+  }
 
   return (
     <tr  data-id="{{id}}" >
@@ -56,7 +61,7 @@ const Todo = ( {todo}: TodoProps) => {
          : <input type="checkbox" name="item_{{id}}" id="item_{{id}}"/>}
         <span className="check"></span>
         <label htmlFor="item_{{id}}">
-          {todo.title} - {dueDate.trim() ? dueDate : "No Due Date"}
+          {todo.title} - {dueDate}
         </label>
       </td>
 
@@ -71,15 +76,13 @@ interface TodoListProps {
 
 const TodoList = ({ todos }: TodoListProps) => {
   return (
-    <>
-      <table cellSpacing="0">
-        <tbody>
-          {todos.map((todo: Todo) => {
-            return <Todo key={todo.id} todo={todo}/>
-          })}
-        </tbody>
-      </table>
-    </>
+    <table cellSpacing="0">
+      <tbody>
+        {todos.map((todo: Todo) => {
+          return <Todo key={todo.id} todo={todo}/>
+        })}
+      </tbody>
+    </table>
   )
 }
 
@@ -124,12 +127,6 @@ const App = () => {
   
   return (
     <>
-      {todos.map((todo: Todo) => {
-        return <p key={todo.id}>
-          {`[ ] ${todo.title} - Due Date Here`}
-          </p>
-      })}
-
       <div id="items">
         <Header todosAmount={todos.length}/>
         <Main todos={todos}/>
