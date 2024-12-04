@@ -119,10 +119,17 @@ const App = () => {
     try {
       const response = await axios.get(`/api/todos`);
       const data = response.data;
-      setTodos(data);
+      const sortedTodos = sortTodos(data);
+      setTodos(sortedTodos);
     } catch (error) {
       console.error(error);
     }
+  }
+
+  const sortTodos = (todos: Todo[]) => {
+    let notDone = todos.filter((t: Todo) => !t.completed);
+    let done = todos.filter((t: Todo) => t.completed);
+    return notDone.concat(done);
   }
   
   return (
