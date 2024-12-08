@@ -139,7 +139,7 @@ const FormModal = ({ currTodo, isOpen, closeFormModal }: FormModalProps) => {
                 <li>
                   <label htmlFor="due">Due Date</label>
                   <div className="date">
-                    <select id="due_day" name="due_day">
+                    <select id="due_day" name="due_day" defaultValue={currTodo.day}>
                       <option>Day</option>
                       <option value="01">1</option>
                       <option value="02">2</option>
@@ -173,7 +173,7 @@ const FormModal = ({ currTodo, isOpen, closeFormModal }: FormModalProps) => {
                       <option value="30">30</option>
                       <option value="31">31</option>
                     </select>  /
-                    <select id="due_month" name="due_month">
+                    <select id="due_month" name="due_month" defaultValue={currTodo.month}>
                       <option>Month</option>
                       <option value="01">January</option>
                       <option value="02">February</option>
@@ -188,7 +188,7 @@ const FormModal = ({ currTodo, isOpen, closeFormModal }: FormModalProps) => {
                       <option value="11">November</option>
                       <option value="12">December</option>
                     </select> /
-                    <select id="due_year" name="due_year">
+                    <select id="due_year" name="due_year" defaultValue={currTodo.year}>
                       <option>Year</option>
                       <option>2014</option>
                       <option>2015</option>
