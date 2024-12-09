@@ -158,9 +158,46 @@ interface FormModalProps {
 }
 
 const FormModal = ({ currTodo, isOpen, closeFormModal }: FormModalProps) => {
+  const {todos, setTodos} = useContext(TodosContext);
+  const [title, setTitle] = useState<string>("");
+  const [day, setDay] = useState<string>("");
+  const [month, setMonth] = useState<string>("");
+  const [year, setYear] = useState<string>("");
+  const [description, setDescription] = useState<string>()
+  
   if (!isOpen) return null;
 
-  if (currTodo) {
+  const updateTodo = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Updating a todo");
+  }
+
+  const addTodo = async (e: React.FormEvent) => {
+    try {
+      e.preventDefault();
+      console.log("Adding new todo");
+
+      const newTodo = {
+        title,
+        day,
+        month,
+        year,
+        description
+      }
+
+      console.log("newTodo value after submititng:", newTodo);
+
+      const response = await axios.post(`api/todos`, newTodo);
+      const data = response.data;
+      setTodos(todos.concat([data]));
+      closeFormModal();
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  if (currTodo) { // FOR AN EXISTING TODO
     return (
       <>
         <div 
@@ -168,7 +205,7 @@ const FormModal = ({ currTodo, isOpen, closeFormModal }: FormModalProps) => {
           id="modal_layer"
           onClick={() => closeFormModal()}></div>
         <div className="modal" id="form_modal">
-          <form action="" method="post">
+          <form action="" method="post" onSubmit={(e) => updateTodo(e)}>
             <fieldset>
               <ul>
                 <li>
@@ -259,7 +296,7 @@ const FormModal = ({ currTodo, isOpen, closeFormModal }: FormModalProps) => {
         </div>
       </>
     )
-  } else { 
+  } else {        // FOR A NEW TODO
     return (
       <>
         <div 
@@ -267,17 +304,21 @@ const FormModal = ({ currTodo, isOpen, closeFormModal }: FormModalProps) => {
           id="modal_layer"
           onClick={() => closeFormModal()}></div>
         <div className="modal" id="form_modal">
-          <form action="" method="post">
+          <form action="" method="post" onSubmit={(e) => addTodo(e)}>
             <fieldset>
               <ul>
                 <li>
                   <label htmlFor="title">Title</label>
-                  <input type="text" name="title" id="title" placeholder="Item 1"/>
+                  <input type="text" name="title" id="title" 
+                         placeholder="Item 1"
+                         onChange={(e) => setTitle(e.target.value)}/>
                 </li>
                 <li>
                   <label htmlFor="due">Due Date</label>
                   <div className="date">
-                    <select id="due_day" name="due_day">
+                    <select id="due_day" name="due_day" 
+                            value={day}
+                            onChange={(e) => setDay(e.target.value)}>
                       <option>Day</option>
                       <option value="01">1</option>
                       <option value="02">2</option>
@@ -311,7 +352,9 @@ const FormModal = ({ currTodo, isOpen, closeFormModal }: FormModalProps) => {
                       <option value="30">30</option>
                       <option value="31">31</option>
                     </select>  /
-                    <select id="due_month" name="due_month">
+                    <select id="due_month" name="due_month"
+                            value={month} 
+                            onChange={(e) => setMonth(e.target.value)}>
                       <option>Month</option>
                       <option value="01">January</option>
                       <option value="02">February</option>
@@ -326,7 +369,9 @@ const FormModal = ({ currTodo, isOpen, closeFormModal }: FormModalProps) => {
                       <option value="11">November</option>
                       <option value="12">December</option>
                     </select> /
-                    <select id="due_year" name="due_year">
+                    <select id="due_year" name="due_year"
+                            value={year}
+                            onChange={(e) => setYear(e.target.value)}>
                       <option>Year</option>
                       <option>2014</option>
                       <option>2015</option>
@@ -345,7 +390,11 @@ const FormModal = ({ currTodo, isOpen, closeFormModal }: FormModalProps) => {
                 </li>
                 <li>
                   <label htmlFor="description">Description</label>
-                  <textarea cols={50} name="description" rows={7} placeholder="Description"></textarea>
+                  <textarea cols={50} name="description" rows={7} 
+                            placeholder="Description"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}>
+                  </textarea>
                 </li>
                 <li>
                   <input type="submit" value="Save" />
