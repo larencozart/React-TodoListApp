@@ -76,17 +76,16 @@ const Todo = ( { setCurrTodo, todo, openFormModal }: TodoProps) => {
     }
   }
 
-  const updateComplete = async (e: React.SyntheticEvent) => {
+  const updateComplete = async () => {
     try {
       // requires axios put call => move to service file
       const updatedTodo = {...todo, completed: !todo.completed};
       const response = await axios.put(`/api/todos/${todo.id}`, updatedTodo);
       const data = response.data;
-      
-      // re-render all todos (table) because order of table will have changed
+
       let updatedTodos = todos.filter(t => t.id !== updatedTodo.id);
       updatedTodos.push(data);
-      setTodos(updatedTodos); // we do this and something else?
+      setTodos(updatedTodos);
     } catch (error) {
       console.error(error);
     }
@@ -106,7 +105,7 @@ const Todo = ( { setCurrTodo, todo, openFormModal }: TodoProps) => {
     <tr data-id={todo.id}>
       <td key={todo.id}
           className="list_item"
-          onClick={(e) => updateComplete(e)}>
+          onClick={() => updateComplete()}>
         <input type="checkbox" 
                name={`item_${todo.id}`}
                checked={todo.completed}
@@ -158,18 +157,40 @@ interface FormModalProps {
 }
 
 const FormModal = ({ currTodo, isOpen, closeFormModal }: FormModalProps) => {
-  const {todos, setTodos} = useContext(TodosContext);
-  const [title, setTitle] = useState<string>("");
-  const [day, setDay] = useState<string>("");
-  const [month, setMonth] = useState<string>("");
-  const [year, setYear] = useState<string>("");
-  const [description, setDescription] = useState<string>()
-  
   if (!isOpen) return null;
 
-  const updateTodo = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Updating a todo");
+  const {todos, setTodos} = useContext(TodosContext);
+  const [title, setTitle] = useState<string>(currTodo ? currTodo.title : "");
+  const [day, setDay] = useState<string>(currTodo ? currTodo.day : "");
+  const [month, setMonth] = useState<string>(currTodo ? currTodo.month : "");
+  const [year, setYear] = useState<string>(currTodo ? currTodo.year : "");
+  const [description, setDescription] = useState<string>(currTodo ? currTodo.description : "");
+
+  const updateTodo = async (e: React.FormEvent) => {
+    try {
+      e.preventDefault();
+      console.log("Updating a todo");
+
+      const updatedTodo = {
+        title,
+        day,
+        month,
+        year,
+        description,
+      }
+
+      const response = await axios.put(`api/todos/${currTodo?.id}`, updatedTodo);
+      const data = response.data;
+
+      // used in Todo Component => abstract to helper?
+      let updatedTodos = todos.filter(t => t.id !== currTodo?.id);
+      updatedTodos.push(data);
+      setTodos(updatedTodos);
+      closeFormModal();
+
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   const addTodo = async (e: React.FormEvent) => {
@@ -197,6 +218,10 @@ const FormModal = ({ currTodo, isOpen, closeFormModal }: FormModalProps) => {
     }
   }
 
+  const markComplete = () => {
+
+  }
+
   if (currTodo) { // FOR AN EXISTING TODO
     return (
       <>
@@ -210,12 +235,14 @@ const FormModal = ({ currTodo, isOpen, closeFormModal }: FormModalProps) => {
               <ul>
                 <li>
                   <label htmlFor="title">Title</label>
-                  <input type="text" name="title" id="title" defaultValue={currTodo.title}/>
+                  <input type="text" name="title" id="title" value={title}
+                         onChange={(e) => setTitle(e.target.value)}/>
                 </li>
                 <li>
                   <label htmlFor="due">Due Date</label>
                   <div className="date">
-                    <select id="due_day" name="due_day" defaultValue={currTodo.day}>
+                    <select id="due_day" name="due_day" value={day}
+                            onChange={(e) => setDay(e.target.value)}>
                       <option>Day</option>
                       <option value="01">1</option>
                       <option value="02">2</option>
@@ -249,7 +276,8 @@ const FormModal = ({ currTodo, isOpen, closeFormModal }: FormModalProps) => {
                       <option value="30">30</option>
                       <option value="31">31</option>
                     </select>  /
-                    <select id="due_month" name="due_month" defaultValue={currTodo.month}>
+                    <select id="due_month" name="due_month" value={month}
+                            onChange={(e) => setMonth(e.target.value)}>
                       <option>Month</option>
                       <option value="01">January</option>
                       <option value="02">February</option>
@@ -264,7 +292,8 @@ const FormModal = ({ currTodo, isOpen, closeFormModal }: FormModalProps) => {
                       <option value="11">November</option>
                       <option value="12">December</option>
                     </select> /
-                    <select id="due_year" name="due_year" defaultValue={currTodo.year}>
+                    <select id="due_year" name="due_year" value={year}
+                            onChange={(e) => setYear(e.target.value)}>
                       <option>Year</option>
                       <option>2014</option>
                       <option>2015</option>
@@ -284,7 +313,8 @@ const FormModal = ({ currTodo, isOpen, closeFormModal }: FormModalProps) => {
                 <li>
                   <label htmlFor="description">Description</label>
                   <textarea cols={50} name="description" rows={7}
-                            defaultValue={currTodo.description}></textarea>
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}></textarea>
                 </li>
                 <li>
                   <input type="submit" value="Save" />
@@ -446,6 +476,8 @@ const Main = ({ todos }: MainProps) => {
   )
 }
 
+
+
 // TODOS CONTEXT
 interface TodosContextType  {
   todos: Todo[];
@@ -460,41 +492,46 @@ const todosContextObj: TodosContextType = {
 // clean ^ this up to use generics below
 const TodosContext = createContext(todosContextObj);
 
+
 // APP COMPONENT
 const App = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [sortedTodos, setSortedTodos] = useState<Todo[]>([]);
   const todosValue = useMemo(
     () => ({ todos, setTodos }), [todos]
   )
 
   useEffect(() => {
     getAllTodos();
-    console.log();
+  }, []);
+
+  useEffect(() => {
+    getSortedTodos();
   }, [todos]);
 
   const getAllTodos = async () => {
     try {
       const response = await axios.get(`/api/todos`);
       const data = response.data;
-      const sortedTodos = sortTodos(data);
-      setTodos(sortedTodos);
+      setTodos(data);
     } catch (error) {
       console.error(error);
     }
   }
 
-  const sortTodos = (todos: Todo[]) => {
-    let notDone = todos.filter((t: Todo) => !t.completed);
-    let done = todos.filter((t: Todo) => t.completed);
-    return notDone.concat(done);
+  const getSortedTodos = () => {
+    const notDone = todos.filter((t: Todo) => !t.completed);
+    const done = todos.filter((t: Todo) => t.completed);
+    const sorted = notDone.concat(done);
+    setSortedTodos(sorted);
   }
   
   return (
     <>
       <TodosContext.Provider value={todosValue as TodosContextType}>
         <div id="items">
-            <Header todosAmount={todos.length}/>
-            <Main todos={todos}/>
+            <Header todosAmount={sortedTodos.length}/>
+            <Main todos={sortedTodos}/>
           </div>
       </TodosContext.Provider>
     </>
