@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, createContext, useMemo, useContext } from 'react'
 import axios from 'axios';
 import '../public/stylesheets/todo_v2.css'
 
@@ -54,10 +54,13 @@ const AddTodoLink = ({ openFormModal }: AddTodoLinkProps) => {
 interface TodoProps {
   todo: Todo;
   openFormModal: () => void;
-  handleTodoClick: (todo: Todo) => void;
+  setCurrTodo: (todo: Todo) => void;
 }
 
-const Todo = ( {todo, openFormModal, handleTodoClick}: TodoProps) => {
+const Todo = ( { setCurrTodo, todo, openFormModal }: TodoProps) => {
+  const { todos, setTodos } = useContext(TodosContext);
+  // console.log("Rerendering Todo Item Component");
+
   let dueDate;
   if (todo.month && todo.year) {
     dueDate = `${todo.month}/${todo.year.slice(2)}`;
@@ -65,19 +68,43 @@ const Todo = ( {todo, openFormModal, handleTodoClick}: TodoProps) => {
     dueDate = "No Due Date";
   }
 
-  const openTodoForm = () => {
-    handleTodoClick(todo);
-    openFormModal();
+  const openTodoForm = (e: React.MouseEvent<HTMLElement>) => {
+    if (e.target instanceof HTMLElement) {
+      setCurrTodo(todo); // sets current todo => maybe change name
+      openFormModal();
+    }
+  }
+
+  const updateComplete = async (e: React.SyntheticEvent) => {
+    e.stopPropagation();
+
+    // requires axios put call => move to service file
+    const updatedTodo = {...todo, completed: !todo.completed};
+    const response = await axios.put(`/api/todos/${todo.id}`, updatedTodo);
+    const data = response.data;
+
+    // re-render all todos (table) because order of table will have changed
+    let updatedTodos = todos.filter(t => t.id !== updatedTodo.id);
+    updatedTodos.push(data);
+    setTodos(updatedTodos); // we do this and something else?
+  }
+
+  const deleteTodo = () => {
+
   }
 
   return (
     <tr data-id={todo.id}>
-      <td className="list_item"
-          onClick={() => openTodoForm()}>
-        {todo.completed 
-         ? <input type="checkbox" name={`item_${todo.id}`} id={`item_${todo.id}`} defaultChecked/>
-         : <input type="checkbox" name={`item_${todo.id}`} id={`item_${todo.id}`}/>}
-        <span className="check"></span>
+      <td key={todo.id}
+          className="list_item"
+          onClick={(e) => openTodoForm(e)}>
+
+        <input type="checkbox" 
+               name={`item_${todo.id}`}
+               checked={todo.completed}
+               readOnly/>
+        <span className="check" onClick={(e) => updateComplete(e)}></span>
+
         <label htmlFor={`item_${todo.id}`}>
           {todo.title} - {dueDate}
         </label>
@@ -91,10 +118,12 @@ const Todo = ( {todo, openFormModal, handleTodoClick}: TodoProps) => {
 interface TodoListProps {
   todos: Todo[];
   openFormModal: () => void;
-  handleTodoClick: (todo: Todo) => void;
+  setCurrTodo: (todo: Todo) => void;
 }
 
-const TodoList = ({ todos, openFormModal, handleTodoClick }: TodoListProps) => {
+const TodoList = ({ setCurrTodo, todos, openFormModal }: TodoListProps) => {
+  // console.log("Rerendering TodoList Component");
+
   return (
     <table cellSpacing="0">
       <tbody>
@@ -104,7 +133,7 @@ const TodoList = ({ todos, openFormModal, handleTodoClick }: TodoListProps) => {
               key={todo.id} 
               todo={todo}
               openFormModal={openFormModal}
-              handleTodoClick={handleTodoClick}/>
+              setCurrTodo={setCurrTodo}/>
           );
         })}
       </tbody>
@@ -326,6 +355,9 @@ interface MainProps {
   todos: Todo[];
 }
 
+
+// MAIN COMPONENT
+
 const Main = ({ todos }: MainProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [currTodo, setCurrTodo] = useState<Todo | null>(null);
@@ -339,20 +371,14 @@ const Main = ({ todos }: MainProps) => {
     setCurrTodo(null);
     setIsOpen(false);
   };
-  const handleTodoClick = (todo: Todo) => {
-    setCurrTodo(todo);
-    console.log("Todo I clicked on:", todo);
-  };
-
-
 
   return (
     <main>
       <AddTodoLink openFormModal={openFormModal}/>
       <TodoList 
+        setCurrTodo={setCurrTodo}
         todos={todos}
-        openFormModal={openFormModal}
-        handleTodoClick={handleTodoClick}/>
+        openFormModal={openFormModal}/>
       <FormModal
         currTodo={currTodo} 
         isOpen={isOpen}
@@ -361,13 +387,31 @@ const Main = ({ todos }: MainProps) => {
   )
 }
 
+// TODOS CONTEXT
+interface TodosContextType  {
+  todos: Todo[];
+  setTodos: (todos: Todo[]) => void;
+}
 
+const todosContextObj: TodosContextType = {
+  todos: [],
+  setTodos: () => {},
+}
+
+// clean ^ this up to use generics below
+const TodosContext = createContext(todosContextObj);
+
+// APP COMPONENT
 const App = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
+  const todosValue = useMemo(
+    () => ({ todos, setTodos }), [todos]
+  )
 
   useEffect(() => {
     getAllTodos();
-  }, []);
+    console.log();
+  }, [todos]);
 
   const getAllTodos = async () => {
     try {
@@ -388,10 +432,12 @@ const App = () => {
   
   return (
     <>
-      <div id="items">
-        <Header todosAmount={todos.length}/>
-        <Main todos={todos}/>
-      </div>
+      <TodosContext.Provider value={todosValue as TodosContextType}>
+        <div id="items">
+            <Header todosAmount={todos.length}/>
+            <Main todos={todos}/>
+          </div>
+      </TodosContext.Provider>
     </>
   )
 }
