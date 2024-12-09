@@ -97,20 +97,21 @@ const Todo = ( { setCurrTodo, todo, openFormModal }: TodoProps) => {
     <tr data-id={todo.id}>
       <td key={todo.id}
           className="list_item"
-          onClick={(e) => openTodoForm(e)}>
-
+          onClick={(e) => updateComplete(e)}>
         <input type="checkbox" 
                name={`item_${todo.id}`}
                checked={todo.completed}
                readOnly/>
-        <span className="check" onClick={(e) => updateComplete(e)}></span>
+        <span className="check"></span>
 
-        <label htmlFor={`item_${todo.id}`}>
+        <label htmlFor={`item_${todo.id}`}
+               onClick={(e) => openTodoForm(e)}>
           {todo.title} - {dueDate}
         </label>
       </td>
 
-      <td className="delete"><img src="images/trash.png" alt="Delete"/></td>
+      <td className="delete"><img src="images/trash.png" alt="Delete"
+          onClick={() => deleteTodo()}/></td>
     </tr>
   )
 }
