@@ -69,6 +69,7 @@ const Todo = ( { setCurrTodo, todo, openFormModal }: TodoProps) => {
   }
 
   const openTodoForm = (e: React.MouseEvent<HTMLElement>) => {
+    e.stopPropagation();
     if (e.target instanceof HTMLElement) {
       setCurrTodo(todo); // sets current todo => maybe change name
       openFormModal();
@@ -77,7 +78,6 @@ const Todo = ( { setCurrTodo, todo, openFormModal }: TodoProps) => {
 
   const updateComplete = async (e: React.SyntheticEvent) => {
     try {
-      e.stopPropagation();
       // requires axios put call => move to service file
       const updatedTodo = {...todo, completed: !todo.completed};
       const response = await axios.put(`/api/todos/${todo.id}`, updatedTodo);
