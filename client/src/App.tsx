@@ -76,21 +76,30 @@ const Todo = ( { setCurrTodo, todo, openFormModal }: TodoProps) => {
   }
 
   const updateComplete = async (e: React.SyntheticEvent) => {
-    e.stopPropagation();
-
-    // requires axios put call => move to service file
-    const updatedTodo = {...todo, completed: !todo.completed};
-    const response = await axios.put(`/api/todos/${todo.id}`, updatedTodo);
-    const data = response.data;
-
-    // re-render all todos (table) because order of table will have changed
-    let updatedTodos = todos.filter(t => t.id !== updatedTodo.id);
-    updatedTodos.push(data);
-    setTodos(updatedTodos); // we do this and something else?
+    try {
+      e.stopPropagation();
+      // requires axios put call => move to service file
+      const updatedTodo = {...todo, completed: !todo.completed};
+      const response = await axios.put(`/api/todos/${todo.id}`, updatedTodo);
+      const data = response.data;
+      
+      // re-render all todos (table) because order of table will have changed
+      let updatedTodos = todos.filter(t => t.id !== updatedTodo.id);
+      updatedTodos.push(data);
+      setTodos(updatedTodos); // we do this and something else?
+    } catch (error) {
+      console.error(error);
+    }
   }
 
-  const deleteTodo = () => {
-
+  const deleteTodo = async () => {
+    try {
+      await axios.delete(`api/todos/${todo.id}`);
+      let updatedTodos = todos.filter(t => t.id !== todo.id);
+      setTodos(updatedTodos);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   return (
