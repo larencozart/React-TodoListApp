@@ -16,7 +16,7 @@ const TodoItem = ( { setCurrTodo, todo, openFormModal }: TodoItemProps) => {
   const openTodoForm = (e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
     if (e.target instanceof HTMLElement) {
-      setCurrTodo(todo); // sets current todo => maybe change name
+      setCurrTodo(todo);
       openFormModal();
     }
   }

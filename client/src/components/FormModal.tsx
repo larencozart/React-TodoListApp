@@ -28,14 +28,13 @@ const FormModal = ({ currTodo, isOpen, closeFormModal }: FormModalProps) => {
 
       const data = await updateTodo(updatedTodo, currTodo!.id);
 
-      // used in Todo Component => abstract to helper?
       let updatedTodos = todos.filter(t => t.id !== currTodo?.id);
       updatedTodos.push(data);
       setTodos(updatedTodos);
       closeFormModal();
 
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
@@ -56,7 +55,7 @@ const FormModal = ({ currTodo, isOpen, closeFormModal }: FormModalProps) => {
       closeFormModal();
 
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 

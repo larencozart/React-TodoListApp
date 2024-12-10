@@ -32,7 +32,7 @@ const createTodo = async (newTodo: PartialTodo) => {
     const response = await axios.post(`api/todos`, newTodo);
     return response.data;
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 }
 
